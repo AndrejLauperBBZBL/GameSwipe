@@ -1,0 +1,45 @@
+<ion-content>
+  <!-- List of Games -->
+  <ion-list>
+    <ion-item-group>
+      <ion-item-divider>
+        <ion-label>Games</ion-label>
+      </ion-item-divider>
+
+      <!-- Iterate Over Games -->
+      <ion-item-sliding *ngFor="let game of games$ | async">
+        <ion-item [button]="true" (click)="addToInterested(game)">
+          <ion-thumbnail slot="start">
+            <img [src]="game.imageUrl" />
+          </ion-thumbnail>
+          <ion-label>
+            <h2>{{ game.title }}</h2>
+            <p>Release Date: {{ game.releaseDate }}</p>
+          </ion-label>
+          <ion-badge slot="end" color="success">Published</ion-badge>
+        </ion-item>
+        <ion-item-options slot="end">
+          <ion-item-option color="danger" (click)="updateGameStatus(game.id, 'not_interested')">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="secondary" (click)="updateGameStatus(game.id, 'played')">
+            <ion-icon slot="icon-only" name="checkmark"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-item-group>
+  </ion-list>
+
+  <!-- Interested Games -->
+  <ion-item-divider>
+    <ion-label>Interested Games</ion-label>
+  </ion-item-divider>
+  <ion-list>
+    <ion-item *ngFor="let game of interestedGames$ | async">
+      <ion-label>
+        <h2>{{ game.title }}</h2>
+        <p>Status: {{ game.status }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
