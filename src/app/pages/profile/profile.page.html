@@ -7,16 +7,26 @@
 <ion-content>
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Create Account</ion-card-title>
+      <ion-card-title>Register or Login</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-item>
-        <ion-label position="floating">Username</ion-label>
-        <!-- <ion-input [(ngModel)]="username" type="text"></ion-input> -->
+        <ion-input
+          (ionInput)="onInput($event)"
+          placeholder="Enter your username"
+        ></ion-input>
       </ion-item>
-      <ion-button expand="block" (click)="createAccount()" [disabled]="!username">
-        Create Account
+      <ion-button expand="block" (click)="register()" [disabled]="!username.trim()">
+        Register
       </ion-button>
+      <ion-button href="pages/home" expand="block" (click)="login()" [disabled]="!username.trim()">
+        Login
+      </ion-button>
+      <ion-item>
+        <ion-label>Profile Picture</ion-label>
+        <ion-button (click)="takePicture()">Take Picture</ion-button>
+      </ion-item>
+      <ion-img *ngIf="profilePicture" [src]="profilePicture"></ion-img>
     </ion-card-content>
   </ion-card>
 </ion-content>

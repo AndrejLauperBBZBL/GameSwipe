@@ -1,57 +1,96 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from '../../services/game.service';
-import { SupabaseService } from '../../services/supabase.service';
 import { Game } from '../../models/game.model';
-import { IonCard, IonThumbnail, IonItemOption, IonIcon, IonItemDivider, IonItemSliding, IonItem, IonList, IonItemGroup, IonLabel, IonCardSubtitle, IonCardContent, IonCardHeader, IonCardTitle, IonHeader, IonToolbar, IonContent, IonTitle, IonBadge, IonItemOptions } from '@ionic/angular/standalone';
+import {
+  IonCard, IonMenuButton, IonThumbnail, IonItemOption, IonIcon,
+  IonItemDivider, IonItemSliding, IonItem, IonList, IonItemGroup, IonLabel,
+  IonCardSubtitle, IonCardContent, IonCardHeader, IonCardTitle, IonHeader,
+  IonToolbar, IonContent, IonTitle, IonBadge, IonItemOptions
+} from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
-import { GameStateService } from 'src/app/services/game-state.service';
 import { Observable } from 'rxjs';
+import { MenuComponent } from 'src/app/components/menu/menu.component';
+import { UserStateService } from 'src/app/services/user-state.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonItemOptions, IonThumbnail, IonItemOption, IonIcon, IonItemDivider, IonItemSliding, IonItem, IonList, IonItemGroup, IonLabel, IonBadge, IonTitle, CommonModule, IonCardSubtitle, IonCardContent, IonToolbar, IonHeader, IonCard, IonCardHeader, IonCardTitle, IonContent]
+  imports: [
+    IonItemOptions, MenuComponent, IonMenuButton, IonThumbnail, IonItemOption,
+    IonIcon, IonItemDivider, IonItemSliding, IonItem, IonList, IonItemGroup,
+    IonLabel, IonBadge, IonTitle, CommonModule, IonCardSubtitle,
+    IonCardContent, IonToolbar, IonHeader, IonCard, IonCardHeader,
+    IonCardTitle, IonContent
+  ]
 })
 export class HomePage implements OnInit {
   games: Game[] = [];
   currentGame: Game | null = null;
   currentIndex = 0;
+
+  // Observables for games and interested games
   games$: Observable<Game[]> | undefined;
   interestedGames$: Observable<Game[]> | undefined;
 
-  constructor(private gameStateService: GameStateService) {}
+  // Replace with actual user ID from authentication
+  userId: string
+
+  constructor(private gameService: GameService, private userState: UserStateService) {
+    this.userId = userState.getUserId() ?? ''
+  }
 
   ngOnInit() {
     this.loadGames();
-    this.games$ = this.gameStateService.getGames();
-    this.interestedGames$ = this.gameStateService.getInterestedGames();
+    this.interestedGames$ = this.fetchInterestedGames();
   }
 
+  // Fetch and load new games
   loadGames() {
-    this.gameStateService.getGames().subscribe(games => {
+    this.gameService.getNewGames().subscribe(games => {
       this.games = games;
-        this.currentGame = this.games[0]; 
+      console.log(games)
+      this.currentGame = this.games[0];
     });
   }
 
-  onSwipe(event: any) {
+  // Fetch interested games
+  fetchInterestedGames(): Observable<Game[]> {
+    return new Observable((observer) => {
+      this.gameService.getInterestedGames(this.userId).then((games) => {
+        observer.next(games);
+        observer.complete();
+      }).catch((error) => {
+        console.error('Failed to fetch interested games:', error);
+        observer.error(error);
+      });
+    });
+  }
+
+  // Handle swipe events to add games to interested list
+  async onSwipe(event: any) {
     if (!this.currentGame) return;
 
-    if (event.direction === 2) { // left swipe
-      this.gameStateService.addToInterested(this.currentGame);
+    if (event.direction === 2) { // Left swipe: Add to interested
+      await this.gameService.saveGamePreference(this.userId, this.currentGame, true);
+      console.log(`${this.currentGame.title} added to interested.`);
     }
-    
+
+    // Move to the next game
     this.currentIndex++;
     this.currentGame = this.games[this.currentIndex] || null;
   }
 
-  addToInterested(game: Game) {
-    this.gameStateService.addToInterested(game);
+  // Manually add a game to the interested list
+  async addToInterested(game: Game) {
+    await this.gameService.saveGamePreference(this.userId, game, true);
+    console.log(`${game.title} added to interested.`);
   }
 
-  updateGameStatus(gameId: number, status: 'played' | 'not_interested') {
-    this.gameStateService.updateGameStatus(gameId, status);
+  // Update the game status (e.g., played or not interested)
+  async updateGameStatus(gameId: number, status: 'played' | 'not_interested') {
+    await this.gameService.updateGameStatus(this.userId, gameId, status);
+    console.log(`Game ${gameId} status updated to ${status}.`);
   }
 }
