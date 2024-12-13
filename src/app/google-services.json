@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "510214636201",
+    "project_id": "gameswipe-e2ace",
+    "storage_bucket": "gameswipe-e2ace.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510214636201:android:5e1ca93db59ec6bcfc5fb8",
+        "android_client_info": {
+          "package_name": "ch.bbzblit.gamewipe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB53oe4SJRwMW4sPlZJgU41VllFH6uw-O4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
